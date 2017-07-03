@@ -3,13 +3,13 @@ gleipnir
 
 Usage:
   gleipnir connect [--server <server> | -s <server>] [--user <user> | -u <user>] [--password <pass> | -p <pass>]
+  gleipnir connect [--host <host> | -h <host>] [--user <user> | -u <user>] [--password <pass> | -p <pass>]
 
 Options:
-  -h --help                         Show this screen.
-  --version                         Show version.
   -s --server                       Search for server name
   -u --user							User (optional)
   -p --password						Use password (optional)
+  -h --host							Host (optional)
 
 Examples:
   gleipnir connect -s test -u ubuntu -p 1

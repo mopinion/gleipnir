@@ -31,15 +31,20 @@ class Connect(Base):
 				print('==============================')
 				print('Server found: {}'.format(servers[0]['tag']))
 				print('==============================')
-				user = self.options['--user'] if '--user' in self.options and self.options['--user'] != None else 'ubuntu'
-				password = os.environ.get('AWS_PASSWORD') if '--password' in self.options and self.options['--password'] != None else None
-				self.ssh(user=user,server=servers[0]['ip'],password=password)
+				self.connect(servers[0]['ip'])
 			else:
 				print('==============================')
 				print('No instances found...')
 				print('==============================')
+		elif '--host' in self.options and self.options['--host'] != None:
+			self.connect(self.options['--host'])
 		else:
 			print('what would you like to connect to? use -s or --server')
+
+	def connect(self,server=None):
+		user = self.options['--user'] if '--user' in self.options and self.options['--user'] != None else 'ubuntu'
+		password = os.environ.get('AWS_PASSWORD') if '--password' in self.options and self.options['--password'] != None else None
+		self.ssh(user=user,server=server,password=password)
 
 	def find(self,term=''):
 		# find instance properties from (part of) name
