@@ -19,7 +19,7 @@ setup(
     version = __version__,
     description = 'Connecting to your AWS instances',
     long_description = long_description,
-    url = 'https://github.com/mopinion/Gleipnir',
+    url = 'https://github.com/mopinion/gleipnir',
     author = 'Floris Snuif',
     author_email = 'floris@mopinion.com',
     license = 'MIT',
