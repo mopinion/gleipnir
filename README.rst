@@ -5,9 +5,22 @@ Gleipnir
 
 Tool to easily connect to your AWS servers
 
+Install
+-------
+	$ pip install gleipnir
+
 Usage
 -----
 	$ gleipnir connect -s "my server name tag"
+
+Searches for EC2 instances by Name tag (regex enabled)
+
+When more than one instance is found it returns a list.
+If just one instance is found it connects.
+
+	$ gleipnir connect -h 192.168.1.1
+
+Connects to server by IP/URL
 
 Environment variables
 ---------------------
