@@ -57,7 +57,7 @@ class Connect(Base):
 				if tag['Key'] == 'Name' and re.search(term, tag['Value']) != None: # term in tag['Value']:
 					servers.append({
 						'tag': reservation['Instances'][0]['Tags'][0]['Value'],
-						'ip': reservation['Instances'][0]['PublicIpAddress'],
+						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
 						'dns': reservation['Instances'][0]['PublicDnsName'],
 					})
 		return servers
