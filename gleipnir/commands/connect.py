@@ -54,8 +54,9 @@ class Connect(Base):
 		for reservation in instances['Reservations']:
 			if 'Tags' in reservation['Instances'][0] and len(reservation['Instances'][0]['Tags']) > 0:
 				tags = reservation['Instances'][0]['Tags']
-				tag = [tag for tag in tags if 'Key' in tag and tag['Key'] == 'Name'][0]
-				if tag['Key'] == 'Name' and re.search(term, tag['Value']) != None: # term in tag['Value']:
+				tags = [tag for tag in tags if 'Key' in tag and tag['Key'] == 'Name']
+				tag = tags[0] if len(tags) > 0 else {}
+				if 'Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) != None: # term in tag['Value']:
 					servers.append({
 						'tag': tag['Value'],
 						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
