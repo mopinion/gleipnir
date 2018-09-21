@@ -68,7 +68,7 @@ class Connect(Base):
 		key = '-i {} '.format(os.environ.get('AWS_KEY_FILE')) if password == None and os.environ.get('AWS_KEY_FILE') != None else ''
 		command = 'ssh {}{}@{}'.format(key, user, server)
 		command = 'sshpass -p {} {}'.format(password, command) if password != None else command
-		print '$ {}'.format(command)
+		print('$ {}'.format(command))
 		# self.cmd(command)
 		os.system(command)
 		# s = pxssh.pxssh()
