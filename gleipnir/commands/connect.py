@@ -11,8 +11,6 @@ class Connect(Base):
 	"""Connect to an instance"""
 
 	def run(self):
-		# print('connect!')
-		# print('You supplied the following options:', dumps(self.options, indent=2, sort_keys=True))
 		self.action()
 
 	def action(self):
@@ -45,7 +43,7 @@ class Connect(Base):
 	def connect(self, server=None):
 		user = self.options['--user'] if '--user' in self.options and self.options['--user'] != None else 'ubuntu'
 		password = os.environ.get('AWS_PASSWORD') if '--password' in self.options and self.options['--password'] != None else None
-		self.ssh(user=user,server=server,password=password)
+		self.ssh(user=user, server=server, password=password)
 
 	def find(self, term=''):
 		# find instance properties from (part of) name
@@ -65,22 +63,18 @@ class Connect(Base):
 					})
 		return servers
 
-	def ssh(self, key_file=None, user='ubuntu', server='localhost',password=None):
-		key = '-i {} '.format(os.environ.get('AWS_KEY_FILE')) if password == None and os.environ.get('AWS_KEY_FILE') != None else ''
+	def ssh(self, key_file=None, user='ubuntu', server='localhost', password=None):
+		key = '-i {} '.format(os.environ.get('AWS_KEY_FILE')) if not password and os.environ.get('AWS_KEY_FILE') else ''
 		command = 'ssh {}{}@{}'.format(key, user, server)
-		command = 'sshpass -p {} {}'.format(password, command) if password != None else command
+		command = 'sshpass -p {} {}'.format(password, command) if password else command
 		print('$ {}'.format(command))
-		# self.cmd(command)
 		os.system(command)
-		# s = pxssh.pxssh()
-		# s.login(server, user, password)
-		# s.prompt()
 
 	def client(self, service=None):
 		access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
 		secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
 		region = os.environ.get('AWS_REGION')
-		return boto3.client(service, aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key,region_name=region)
+		return boto3.client(service, aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key, region_name=region)
 
 	def instances(self):
 		# get all EC2 instances
