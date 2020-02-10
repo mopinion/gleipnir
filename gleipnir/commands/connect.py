@@ -6,6 +6,7 @@ import boto3
 import os
 import re
 
+
 class Connect(Base):
 	"""Connect to an instance"""
 
@@ -41,12 +42,12 @@ class Connect(Base):
 		else:
 			print('what would you like to connect to? use -s or --server')
 
-	def connect(self,server=None):
+	def connect(self, server=None):
 		user = self.options['--user'] if '--user' in self.options and self.options['--user'] != None else 'ubuntu'
 		password = os.environ.get('AWS_PASSWORD') if '--password' in self.options and self.options['--password'] != None else None
 		self.ssh(user=user,server=server,password=password)
 
-	def find(self,term=''):
+	def find(self, term=''):
 		# find instance properties from (part of) name
 		instances = self.instances()
 		servers = []
@@ -64,7 +65,7 @@ class Connect(Base):
 					})
 		return servers
 
-	def ssh(self,key_file=None,user='ubuntu',server='localhost',password=None):
+	def ssh(self, key_file=None, user='ubuntu', server='localhost',password=None):
 		key = '-i {} '.format(os.environ.get('AWS_KEY_FILE')) if password == None and os.environ.get('AWS_KEY_FILE') != None else ''
 		command = 'ssh {}{}@{}'.format(key, user, server)
 		command = 'sshpass -p {} {}'.format(password, command) if password != None else command
@@ -91,7 +92,7 @@ class Connect(Base):
 		command = 'brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb'
 		self.cmd(command)
 
-	def cmd(self,command=''):
+	def cmd(self, command=''):
 		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 		(out, err) = proc.communicate()
 		return out
