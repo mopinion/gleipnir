@@ -2,14 +2,15 @@
 gleipnir
 
 Usage:
-  gleipnir connect [--server <server> | -s <server>] [--user <user> | -u <user>] [--password <pass> | -p <pass>]
-  gleipnir connect [--host <host> | -h <host>] [--user <user> | -u <user>] [--password <pass> | -p <pass>]
+  gleipnir connect [--server <server> | -s <server>] [--user <user> | -u <user>] [--password <pass> | -p <pass>] [--mosh | -m]
+  gleipnir connect [--host <host> | -h <host>] [--user <user> | -u <user>] [--password <pass> | -p <pass>] [--mosh | -m]
 
 Options:
   -s --server                       Search for server name
   -u --user							User (optional)
   -p --password						Use password (optional)
   -h --host							Host (optional)
+  -m --mosh             Mosh (optional)
 
 Examples:
   gleipnir connect -s test -u ubuntu -p 1

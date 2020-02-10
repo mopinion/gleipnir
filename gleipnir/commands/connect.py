@@ -41,9 +41,13 @@ class Connect(Base):
 			print('what would you like to connect to? use -s or --server')
 
 	def connect(self, server=None):
-		user = self.options['--user'] if '--user' in self.options and self.options['--user'] != None else 'ubuntu'
-		password = os.environ.get('AWS_PASSWORD') if '--password' in self.options and self.options['--password'] != None else None
-		self.ssh(user=user, server=server, password=password)
+		# user
+		user = self.options['--user'] if '--user' in self.options and self.options['--user'] else 'ubuntu'
+		# passwd
+		password = os.getenv('AWS_PASSWORD') if '--password' in self.options and self.options['--password'] else None
+		# mosh
+		mosh = True if '--mosh' in self.options and self.options['--mosh'] else True if os.getenv('MOSH') else False
+		self.ssh(user=user, server=server, password=password, mosh=mosh)
 
 	def find(self, term=''):
 		# find instance properties from (part of) name
@@ -63,10 +67,14 @@ class Connect(Base):
 					})
 		return servers
 
-	def ssh(self, key_file=None, user='ubuntu', server='localhost', password=None):
+	def ssh(self, key_file=None, user='ubuntu', server='localhost', password=None, mosh=True):
 		key = '-i {} '.format(os.environ.get('AWS_KEY_FILE')) if not password and os.environ.get('AWS_KEY_FILE') else ''
+		# key
 		command = 'ssh {}{}@{}'.format(key, user, server)
+		# passwd
 		command = 'sshpass -p {} {}'.format(password, command) if password else command
+		# mosh
+		command = 'mosh {}@{} --ssh "ssh {}"'.format(user, server, key) if mosh else command
 		print('$ {}'.format(command))
 		os.system(command)
 
