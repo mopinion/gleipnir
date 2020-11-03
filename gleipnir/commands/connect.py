@@ -19,11 +19,12 @@ class Connect(Base):
 			server_name = self.options['<server>'] if '<server>' in self.options else ''
 			servers = self.find(term=server_name)
 			if len(servers) > 1:
+				# show possible servers
 				print('==============================')
 				print('Multiple instances were found:')
 				print('==============================')
 				for server in servers:
-					print('> {} ({} / {})'.format(server['tag'], server['ip'], server['dns']))
+					print('> {} ({} / {}) @ {}'.format(server['tag'], server['ip'], server['dns'], server['datetime']))
 				print('-------------------------------')
 			elif len(servers) == 1:
 				# connect to server
@@ -32,6 +33,7 @@ class Connect(Base):
 				print('==============================')
 				self.connect(servers[0]['ip'])
 			else:
+				# no servers found
 				print('==============================')
 				print('No instances found...')
 				print('==============================')
@@ -67,6 +69,7 @@ class Connect(Base):
 						'tag': tag['Value'],
 						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
 						'dns': reservation['Instances'][0]['PublicDnsName'],
+						'datetime': reservation['Instances'][0]['LaunchTime']
 					})
 		return servers
 
