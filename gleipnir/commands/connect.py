@@ -40,7 +40,7 @@ class Connect(Base):
 				print('==============================')
 				print('No instances found...')
 				print('==============================')
-		elif '--host' in self.options and self.options['--host'] != None:
+		elif '--host' in self.options and self.options['--host'] is not None:
 			self.connect(self.options['--host'])
 		else:
 			print('what would you like to connect to? use -s or --server')
@@ -67,7 +67,7 @@ class Connect(Base):
 				tags = reservation['Instances'][0]['Tags']
 				tags = [tag for tag in tags if 'Key' in tag and tag['Key'] == 'Name']
 				tag = tags[0] if len(tags) > 0 else {}
-				if 'Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) != None and state == 'running':  # term in tag['Value']:
+				if 'Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) is not None and state == 'running':  # term in tag['Value']:
 					servers.append({
 						'tag': tag['Value'],
 						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
