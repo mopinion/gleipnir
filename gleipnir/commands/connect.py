@@ -54,7 +54,7 @@ class Connect(Base):
 		mosh = True if '--mosh' in self.options and self.options['--mosh'] else True if os.getenv('MOSH') else False
 		self.ssh(user=user, server=server, password=password, mosh=mosh)
 
-	def find(self, term=''):
+	def find(self, term='', server=None):
 		# find instance properties from (part of) name
 		instances = self.instances()
 		servers = []
@@ -67,7 +67,7 @@ class Connect(Base):
 				tags = reservation['Instances'][0]['Tags']
 				tags = [tag for tag in tags if 'Key' in tag and tag['Key'] == 'Name']
 				tag = tags[0] if len(tags) > 0 else {}
-				if 'Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) is not None and state == 'running':  # term in tag['Value']:
+				if ((reservation['Instances'][0]['PublicIpAddress'] == server or reservation['Instances'][0]['PublicDnsName'] == server) or ('Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) is not None)) and state == 'running':  # term in tag['Value']:
 					servers.append({
 						'tag': tag['Value'],
 						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
