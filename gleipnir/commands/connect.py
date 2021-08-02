@@ -84,10 +84,19 @@ class Connect(Base):
 		# key argument
 		if not aws_key_file:
 			# no private key file set -> use EC2 instance connect
-			# generate key pair
-			self.generateKeyPair()
-			# send pubic key to server
-			self.sendPublicKey(instance_id=None, user=user, avail_zone=None)
+			# server info
+			servers = self.find(server=server)
+			host = servers[0] if len(servers) > 0 else None
+			if host:
+				# generate key pair
+				self.generateKeyPair()
+				# send pubic key to server
+				self.sendPublicKey(instance_id=host['instance_id'], user=user, avail_zone=host['availability_zone'])
+				# key
+				key = '-i {} '.format(self.keyName(public=False))
+			else:
+				# not found
+				print('server not found...')
 		else:
 			# use set private key file
 			key = '-i {} '.format(aws_key_file) if not password and aws_key_file else ''
