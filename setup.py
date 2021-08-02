@@ -44,6 +44,7 @@ setup(
 	install_requires = [
 		'docopt',
 		'boto3',
+		'cryptography',
 	],
 	extras_require = {
 		'test': ['coverage', 'pytest', 'pytest-cov'],

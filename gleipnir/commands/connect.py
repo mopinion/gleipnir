@@ -5,6 +5,9 @@ import subprocess
 import boto3
 import os
 import re
+from cryptography.hazmat.primitives import serialization as crypto_serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend as crypto_default_backend
 
 
 class Connect(Base):
@@ -95,6 +98,43 @@ class Connect(Base):
 		client = self.client(service='ec2')
 		instances = client.describe_instances()
 		return instances
+
+	def generateKeyPair(self):
+		'''
+		generate RSA key pair for connecting via SSH
+		'''
+		# generate key
+		key = rsa.generate_private_key(
+			backend=crypto_default_backend(),
+			public_exponent=65537,
+			key_size=2048
+		)
+		# private key
+		private_key = key.private_bytes(
+			crypto_serialization.Encoding.PEM,
+			crypto_serialization.PrivateFormat.PKCS8,
+			crypto_serialization.NoEncryption()
+		)
+		open(self.keyName(public=False), 'wb').write(private_key)
+		# public key
+		public_key = key.public_key().public_bytes(
+			encoding=crypto_serialization.Encoding.OpenSSH,
+			format=crypto_serialization.PublicFormat.OpenSSH
+		)
+		open(self.keyName(public=True), 'wb').write(public_key)
+
+	def keyName(self, public=False):
+		'''
+		return key location/name
+		'''
+		# SSH location
+		ssh_loc = '{}/.ssh'.format(os.getenv('HOME'))
+		if public:
+			# public key
+			return '{}/gleipnir.private.pem'.format(ssh_loc)
+		else:
+			# private key
+			return '{}/gleipnir.public.pem'.format(ssh_loc)
 
 	def sshpass(self):
 		command = 'brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb'
