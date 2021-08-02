@@ -99,6 +99,18 @@ class Connect(Base):
 		instances = client.describe_instances()
 		return instances
 
+	def sendPublicKey(self, instance_id=None, user=None, avail_zone=None):
+		'''
+		send public key to instance for use in Instance Connect
+		'''
+		# boto client
+		client = self.client(service='ec2-instance-connect')
+		# get public key
+		public_key = open(self.keyName(public=True), 'rb').read()
+		# send key
+		response = client.send_ssh_public_key(InstanceId=instance_id, InstanceOSUser=user, SSHPublicKey=public_key.decode(), AvailabilityZone=avail_zone)
+		return response
+
 	def generateKeyPair(self):
 		'''
 		generate RSA key pair for connecting via SSH
@@ -131,10 +143,10 @@ class Connect(Base):
 		ssh_loc = '{}/.ssh'.format(os.getenv('HOME'))
 		if public:
 			# public key
-			return '{}/gleipnir.private.pem'.format(ssh_loc)
+			return '{}/gleipnir.public.pem'.format(ssh_loc)
 		else:
 			# private key
-			return '{}/gleipnir.public.pem'.format(ssh_loc)
+			return '{}/gleipnir.private.pem'.format(ssh_loc)
 
 	def sshpass(self):
 		command = 'brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb'
