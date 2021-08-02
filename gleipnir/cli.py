@@ -6,9 +6,9 @@ Usage:
   gleipnir connect [--host <host> | -h <host>] [--user <user> | -u <user>] [--password <pass> | -p <pass>] [--mosh | -m]
 
 Options:
-  -s --server                       Search for server name
+  -s --server           Search for server name
   -u --user							User (optional)
-  -p --password						Use password (optional)
+  -p --password					Use password (optional)
   -h --host							Host (optional)
   -m --mosh             Mosh (optional)
 

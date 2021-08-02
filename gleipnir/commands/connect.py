@@ -72,12 +72,25 @@ class Connect(Base):
 						'tag': tag['Value'],
 						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
 						'dns': reservation['Instances'][0]['PublicDnsName'],
-						'datetime': reservation['Instances'][0]['LaunchTime']
+						'datetime': reservation['Instances'][0]['LaunchTime'],
+						'instance_id': reservation['Instances'][0]['InstanceId'],
+						'availability_zone': reservation['Instances'][0]['Placement'].get('AvailabilityZone'),
 					})
 		return servers
 
 	def ssh(self, key_file=None, user='ubuntu', server='localhost', password=None, mosh=True):
-		key = '-i {} '.format(os.environ.get('AWS_KEY_FILE')) if not password and os.environ.get('AWS_KEY_FILE') else ''
+		# AWS private key file
+		aws_key_file = os.environ.get('AWS_KEY_FILE')
+		# key argument
+		if not aws_key_file:
+			# no private key file set -> use EC2 instance connect
+			# generate key pair
+			self.generateKeyPair()
+			# send pubic key to server
+			self.sendPublicKey(instance_id=None, user=user, avail_zone=None)
+		else:
+			# use set private key file
+			key = '-i {} '.format(aws_key_file) if not password and aws_key_file else ''
 		# key
 		command = 'ssh {}{}@{}'.format(key, user, server)
 		# passwd
