@@ -20,7 +20,7 @@ class Connect(Base):
 		if '--server' in self.options and self.options['--server']:
 			# find server
 			server_name = self.options['<server>'] if '<server>' in self.options else ''
-			servers = self.find(term=server_name)
+			servers = self.find(term=server_name, dynamic_keys=False)
 			if len(servers) > 1:
 				# show possible servers
 				print('==============================')
@@ -54,7 +54,7 @@ class Connect(Base):
 		mosh = True if '--mosh' in self.options and self.options['--mosh'] else True if os.getenv('MOSH') else False
 		self.ssh(user=user, server=server, password=password, mosh=mosh)
 
-	def find(self, term='', server=None):
+	def find(self, term='', server=None, dynamic_keys=False):
 		# find instance properties from (part of) name
 		instances = self.instances()
 		servers = []
@@ -67,7 +67,7 @@ class Connect(Base):
 				tags = reservation['Instances'][0]['Tags']
 				tags = [tag for tag in tags if 'Key' in tag and tag['Key'] == 'Name']
 				tag = tags[0] if len(tags) > 0 else {}
-				if ((reservation['Instances'][0]['PublicIpAddress'] == server or reservation['Instances'][0]['PublicDnsName'] == server) or ('Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) is not None)) and state == 'running':  # term in tag['Value']:
+				if (((reservation['Instances'][0].get('PublicIpAddress') == server or reservation['Instances'][0].get('PublicDnsName') == server) and dynamic_keys) or ('Key' in tag and tag['Key'] == 'Name' and re.search(term, tag['Value']) is not None) and not dynamic_keys) and state == 'running':  # term in tag['Value']:
 					servers.append({
 						'tag': tag['Value'],
 						'ip': reservation['Instances'][0]['PublicIpAddress'] if 'PublicIpAddress' in reservation['Instances'][0] else '-',
@@ -76,6 +76,9 @@ class Connect(Base):
 						'instance_id': reservation['Instances'][0]['InstanceId'],
 						'availability_zone': reservation['Instances'][0]['Placement'].get('AvailabilityZone'),
 					})
+		# info
+		if self.options.get('--verbose', False):
+			print('servers found: {}'.format(len(servers)))
 		return servers
 
 	def ssh(self, key_file=None, user='ubuntu', server='localhost', password=None, mosh=True):
@@ -85,13 +88,16 @@ class Connect(Base):
 		if not aws_key_file:
 			# no private key file set -> use EC2 instance connect
 			# server info
-			servers = self.find(server=server)
+			# info
+			if self.options.get('--verbose', False):
+				print('searching server {}...'.format(server))
+			servers = self.find(server=server, dynamic_keys=True)
 			host = servers[0] if len(servers) > 0 else None
 			if host:
 				# generate key pair
 				self.generateKeyPair()
 				# send pubic key to server
-				self.sendPublicKey(instance_id=host['instance_id'], user=user, avail_zone=host['availability_zone'])
+				self.sendPublicKey(instance_id=host['instance_id'], user=user, avail_zone=host['availability_zone'], server=server)
 				# key
 				key = '-i {} '.format(self.keyName(public=False))
 			else:
@@ -121,7 +127,7 @@ class Connect(Base):
 		instances = client.describe_instances()
 		return instances
 
-	def sendPublicKey(self, instance_id=None, user=None, avail_zone=None):
+	def sendPublicKey(self, instance_id=None, user=None, avail_zone=None, server=None):
 		'''
 		send public key to instance for use in Instance Connect
 		'''
@@ -131,10 +137,16 @@ class Connect(Base):
 		public_key_file = self.keyName(public=True)
 		public_key = open(public_key_file, 'rb').read()
 		# send key
-		response = client.send_ssh_public_key(InstanceId=instance_id, InstanceOSUser=user, SSHPublicKey=public_key.decode(), AvailabilityZone=avail_zone)
+		try:
+			response = client.send_ssh_public_key(InstanceId=instance_id, InstanceOSUser=user, SSHPublicKey=public_key.decode(), AvailabilityZone=avail_zone)
+		except Exception as e:
+			if self.options.get('--verbose', False):
+				print('error uploading public key:')
+				print(e)
+			return
 		# info
 		if self.options.get('--verbose', False):
-			print('public key {} sent to instance {}'.format(public_key_file, instance_id))
+			print('public key {} sent to instance {} ({})'.format(public_key_file, instance_id, server))
 			print(response)
 		return response
 
