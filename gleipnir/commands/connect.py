@@ -169,6 +169,8 @@ class Connect(Base):
 		# save to private key file
 		private_key_file = self.keyName(public=False)
 		open(private_key_file, 'wb').write(private_key)
+		# set rights
+		os.system('chown 600 {}'.format(private_key_file))
 		# info
 		if self.options.get('--verbose', False):
 			print('private key saved @ {}'.format(private_key_file))
@@ -183,6 +185,8 @@ class Connect(Base):
 		# save to public key file
 		public_key_file = self.keyName(public=True)
 		open(public_key_file, 'wb').write(public_key)
+		# set rights
+		os.system('chown 600 {}'.format(public_key_file))
 		# info
 		if self.options.get('--verbose', False):
 			print('public key saved @ {}'.format(public_key_file))
