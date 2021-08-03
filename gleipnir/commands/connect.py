@@ -128,12 +128,17 @@ class Connect(Base):
 		# boto client
 		client = self.client(service='ec2-instance-connect')
 		# get public key
-		public_key = open(self.keyName(public=True), 'rb').read()
+		public_key_file = self.keyName(public=True)
+		public_key = open(public_key_file, 'rb').read()
 		# send key
 		response = client.send_ssh_public_key(InstanceId=instance_id, InstanceOSUser=user, SSHPublicKey=public_key.decode(), AvailabilityZone=avail_zone)
+		# info
+		if self.options.get('--verbose', False):
+			print('public key {} sent to instance {}'.format(public_key_file, instance_id))
+			print(response)
 		return response
 
-	def generateKeyPair(self):
+	def generateKeyPair(self, use_public_pem=False):
 		'''
 		generate RSA key pair for connecting via SSH
 		'''
@@ -149,13 +154,26 @@ class Connect(Base):
 			crypto_serialization.PrivateFormat.PKCS8,
 			crypto_serialization.NoEncryption()
 		)
-		open(self.keyName(public=False), 'wb').write(private_key)
+		# save to private key file
+		private_key_file = self.keyName(public=False)
+		open(private_key_file, 'wb').write(private_key)
+		# info
+		if self.options.get('--verbose', False):
+			print('private key saved @ {}'.format(private_key_file))
+		# encoding / format
+		encoding = crypto_serialization.Encoding.PEM if use_public_pem else crypto_serialization.Encoding.OpenSSH
+		format = crypto_serialization.PublicFormat.SubjectPublicKeyInfo if use_public_pem else crypto_serialization.PublicFormat.OpenSSH
 		# public key
 		public_key = key.public_key().public_bytes(
-			encoding=crypto_serialization.Encoding.OpenSSH,
-			format=crypto_serialization.PublicFormat.OpenSSH
+			encoding=encoding,
+			format=format
 		)
-		open(self.keyName(public=True), 'wb').write(public_key)
+		# save to public key file
+		public_key_file = self.keyName(public=True)
+		open(public_key_file, 'wb').write(public_key)
+		# info
+		if self.options.get('--verbose', False):
+			print('public key saved @ {}'.format(public_key_file))
 
 	def keyName(self, public=False):
 		'''
